@@ -1,15 +1,4 @@
 import { auth } from './firebase';
-import {
-    DUMMY_USER,
-    DUMMY_JOB_SEEKER_PROFILE,
-    DUMMY_EMPLOYER_PROFILE,
-    DUMMY_JOBS,
-    DUMMY_JOB_SEEKER_STATS,
-    DUMMY_EMPLOYER_STATS,
-    DUMMY_RECOMMENDED_JOBS,
-    DUMMY_RECOMMENDED_CANDIDATES,
-    DUMMY_SKILL_GAP_ANALYSIS
-} from '../data/dummyData';
 
 export const API_BASE_URL = 'http://localhost:5000';
 
@@ -26,145 +15,313 @@ export interface APIResponse<T = any> {
     code?: string;
 }
 
-const mockDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 export const registerUser = async ({ idToken, role, authProvider }: RegisterUserParams) => {
-    await mockDelay(500);
-    console.log('Dummy registerUser called', { role, authProvider });
-    return role === 'EMPLOYER' ? DUMMY_EMPLOYER_PROFILE : DUMMY_JOB_SEEKER_PROFILE;
+    const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken, role, authProvider }),
+    });
+
+    const resData: APIResponse = await response.json();
+
+    if (!response.ok || !resData.success) {
+        throw new Error(resData.message || 'Registration failed');
+    }
+
+    return resData.data;
 };
 
 export const loginUser = async (idToken: string) => {
-    await mockDelay(500);
-    console.log('Dummy loginUser called');
-    return DUMMY_USER;
+    const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken }),
+    });
+
+    const resData: APIResponse = await response.json();
+
+    if (!response.ok || !resData.success) {
+        throw new Error(resData.message || 'Login failed');
+    }
+
+    return resData.data;
 };
 
 export const completeOnboarding = async (token: string) => {
-    await mockDelay(500);
-    console.log('Dummy completeOnboarding called');
-    return { ...DUMMY_USER, onboardingCompleted: true };
+    const response = await fetch(`${API_BASE_URL}/auth/onboarding/complete`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const resData: APIResponse = await response.json();
+
+    if (!response.ok || !resData.success) {
+        throw new Error(resData.message || 'Failed to update onboarding status');
+    }
+
+    return resData.data;
 };
 
 export const updateProfile = async (token: string, data: any) => {
-    await mockDelay(500);
-    console.log('Dummy updateProfile called', data);
-    return { ...DUMMY_USER, ...data };
+    const response = await fetch(`${API_BASE_URL}/auth/profile`, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    const resData: APIResponse = await response.json();
+
+    if (!response.ok || !resData.success) {
+        throw new Error(resData.message || 'Failed to update profile');
+    }
+
+    return resData.data;
 };
 
 export const fetchProtectedData = async (endpoint: string, token: string) => {
-    await mockDelay(300);
-    console.log('Dummy fetchProtectedData called', endpoint);
-    if (endpoint.includes('/api/job-seeker/profile') || endpoint.includes('/auth/me')) {
-        return DUMMY_JOB_SEEKER_PROFILE;
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    const resData: APIResponse = await response.json();
+
+    if (!response.ok || !resData.success) {
+        if (response.status === 403) throw new Error(resData.message || 'Access Denied');
+        if (response.status === 401) throw new Error(resData.message || 'Unauthorized');
+        throw new Error(resData.message || 'API Error');
     }
-    if (endpoint.includes('/api/employer/profile')) {
-        return DUMMY_EMPLOYER_PROFILE;
-    }
-    return { message: 'Protected data fetched' };
+
+    return resData.data;
 };
 
 export const checkForgotPassword = async (email: string) => {
-    await mockDelay(300);
-    console.log('Dummy checkForgotPassword called', email);
-    return { success: true, message: 'If an account exists, an email has been sent.' };
+    const response = await fetch(`${API_BASE_URL}/auth/forgot-password-check`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+    });
+
+    const resData: APIResponse = await response.json();
+
+    if (!response.ok || !resData.success) {
+        throw new Error(resData.message || 'Verification failed');
+    }
+
+    return resData;
 };
 
 export const saveJobSeekerProfile = async (token: string, data: any) => {
-    await mockDelay(500);
-    console.log('Dummy saveJobSeekerProfile called', data);
-    return { ...DUMMY_JOB_SEEKER_PROFILE, ...data };
+    const response = await fetch(`${API_BASE_URL}/api/job-seeker/profile`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    const resData: APIResponse = await response.json();
+
+    if (!response.ok || !resData.success) {
+        throw new Error(resData.message || 'Failed to save profile');
+    }
+
+    return resData.data;
 };
 
 export const getJobSeekerProfile = async (token: string) => {
-    await mockDelay(300);
-    console.log('Dummy getJobSeekerProfile called');
-    return DUMMY_JOB_SEEKER_PROFILE;
+    const response = await fetch(`${API_BASE_URL}/api/job-seeker/profile`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const resData: APIResponse = await response.json();
+
+    if (!response.ok || !resData.success) {
+        throw new Error(resData.message || 'Failed to fetch profile');
+    }
+
+    return resData.data;
 };
 
 export const deleteUserAccount = async (token: string) => {
-    await mockDelay(500);
-    console.log('Dummy deleteUserAccount called');
-    return { success: true };
+    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+
+    const resData: APIResponse = await response.json();
+
+    if (!response.ok || !resData.success) {
+        throw new Error(resData.message || 'Failed to delete account');
+    }
+
+    return resData.data;
 };
 
 export const updateEmployerProfile = async (token: string, data: any) => {
-    await mockDelay(500);
-    console.log('Dummy updateEmployerProfile called', data);
-    return { ...DUMMY_EMPLOYER_PROFILE, ...data };
+    const response = await fetch(`${API_BASE_URL}/api/employer/profile`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    const resData: APIResponse = await response.json();
+
+    if (!response.ok || !resData.success) {
+        throw new Error(resData.message || 'Failed to update company profile');
+    }
+
+    return resData.data;
 };
 
 export const createJob = async (token: string, data: any) => {
-    await mockDelay(500);
-    console.log('Dummy createJob called', data);
-    const newJob = { ...DUMMY_JOBS[0], ...data, id: `job-${Date.now()}` };
-    return newJob;
+    const response = await fetch(`${API_BASE_URL}/api/jobs`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    const resData: APIResponse = await response.json();
+
+    if (!response.ok || !resData.success) {
+        throw new Error(resData.message || 'Failed to create job');
+    }
+
+    return resData.data;
 };
 
 export const fetchJobs = async (token: string, status?: string) => {
-    await mockDelay(300);
-    console.log('Dummy fetchJobs called', status);
-    return DUMMY_JOBS;
+    const url = status
+        ? `${API_BASE_URL}/api/jobs/employer?status=${status}`
+        : `${API_BASE_URL}/api/jobs/employer`;
+
+    const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const resData: APIResponse = await response.json();
+    if (!response.ok) throw new Error(resData.message);
+    return resData.data;
 };
 
 export const updateJob = async (token: string, id: string, data: any) => {
-    await mockDelay(500);
-    console.log('Dummy updateJob called', id, data);
-    return { ...DUMMY_JOBS[0], ...data, id };
+    const response = await fetch(`${API_BASE_URL}/api/jobs/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+    const resData: APIResponse = await response.json();
+    if (!response.ok) throw new Error(resData.message);
+    return resData.data;
 };
 
 export const deleteJob = async (token: string, id: string) => {
-    await mockDelay(500);
-    console.log('Dummy deleteJob called', id);
-    return { success: true, id };
+    const response = await fetch(`${API_BASE_URL}/api/jobs/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+        },
+    });
+    const resData: APIResponse = await response.json();
+    if (!response.ok) throw new Error(resData.message);
+    return resData.data;
 };
 
 export const fetchJobById = async (token: string, id: string) => {
-    await mockDelay(300);
-    console.log('Dummy fetchJobById called', id);
-    const job = DUMMY_JOBS.find(j => j.id === id) || DUMMY_JOBS[0];
-    return job;
-};
-
-export const fetchRecommendedJobs = async (token: string) => {
-    await mockDelay(300);
-    console.log('Dummy fetchRecommendedJobs called');
-    return DUMMY_RECOMMENDED_JOBS;
-};
-
-export const fetchRecommendedCandidates = async (token: string, jobId: string) => {
-    await mockDelay(300);
-    console.log('Dummy fetchRecommendedCandidates called', jobId);
-    return DUMMY_RECOMMENDED_CANDIDATES;
+    const response = await fetch(`${API_BASE_URL}/api/jobs/${id}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    const resData: APIResponse = await response.json();
+    if (!response.ok) throw new Error(resData.message || 'Failed to fetch job');
+    return resData.data;
 };
 
 export const fetchDashboardStats = async (token: string) => {
-    await mockDelay(300);
-    console.log('Dummy fetchDashboardStats called');
-    return DUMMY_JOB_SEEKER_STATS;
+    const response = await fetch(`${API_BASE_URL}/api/job-seeker/dashboard-stats`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    const resData: APIResponse = await response.json();
+    if (!response.ok) throw new Error(resData.message || 'Failed to fetch stats');
+    return resData.data;
 };
 
 export const fetchEmployerDashboardStats = async (token: string) => {
-    await mockDelay(300);
-    console.log('Dummy fetchEmployerDashboardStats called');
-    return DUMMY_EMPLOYER_STATS;
+    const response = await fetch(`${API_BASE_URL}/api/employer/dashboard-stats`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    const resData: APIResponse = await response.json();
+    if (!response.ok) throw new Error(resData.message || 'Failed to fetch employer stats');
+    return resData.data;
 };
 
 export const uploadResumeFile = async (file: File, token: string) => {
-    await mockDelay(1000);
-    console.log('Dummy uploadResumeFile called', file.name);
-    return { success: true, fileUrl: 'https://example.com/dummy-resume.pdf' };
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData
+    });
+
+    if (!response.ok) {
+        throw new Error('Upload failed');
+    }
+    return response.json();
 };
 
 export const fetchCandidateById = async (token: string, userId: string) => {
-    await mockDelay(300);
-    console.log('Dummy fetchCandidateById called', userId);
-    return { ...DUMMY_JOB_SEEKER_PROFILE, uid: userId };
+    const response = await fetch(`${API_BASE_URL}/api/employer/candidate/${userId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    const resData: APIResponse = await response.json();
+    if (!response.ok) throw new Error(resData.message || 'Failed to fetch candidate');
+    return resData.data;
 };
-
-export const analyzeSkillGap = async (token: string, jobId: string) => {
-    await mockDelay(1000);
-    console.log('Dummy analyzeSkillGap called', jobId);
-    return DUMMY_SKILL_GAP_ANALYSIS;
-};
-

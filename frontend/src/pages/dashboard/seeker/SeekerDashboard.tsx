@@ -4,7 +4,7 @@ import { JobCard } from "@/components/dashboard/JobCard";
 import { JobFiltersWidget, JobFiltersState } from "@/components/dashboard/JobFiltersWidget";
 import { JobCardSkeleton } from "@/components/dashboard/JobCardSkeleton";
 import { useState, useEffect, useMemo } from "react";
-import { fetchRecommendedJobs, getJobSeekerProfile, fetchDashboardStats } from "@/lib/auth-api";
+import { getJobSeekerProfile, fetchDashboardStats } from "@/lib/auth-api";
 import { useToast } from "@/hooks/use-toast";
 
 export const SeekerDashboard = () => {
@@ -38,9 +38,18 @@ export const SeekerDashboard = () => {
           const dashboardStats = await fetchDashboardStats(token);
           setStats(dashboardStats);
 
-          // 3. Fetch Recommendations
-          const jobs = await fetchRecommendedJobs(token);
-          setRecommendedJobs(jobs);
+          // 3. Fetch Jobs
+          const response = await fetch('/api/jobs', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setRecommendedJobs(data.data || []);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch dashboard data", err);

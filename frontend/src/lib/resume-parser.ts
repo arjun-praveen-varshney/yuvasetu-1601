@@ -75,48 +75,61 @@ export async function parseResumeFile(file: File): Promise<ParsingResult> {
 
         // --- ON-DEMAND AI OPTIMIZATION (HYBRID MERGE) ---
         try {
-             // Mock AI response
-             const { DUMMY_PARSED_RESUME } = await import('@/data/dummyData');
-             const mockAiDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-             await mockAiDelay(1000); // Simulate network delay
-             
-             const aiData = DUMMY_PARSED_RESUME as any; // Cast to any to avoid strict type checks here
-             usedAI = true;
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                const aiResponse = await fetch(`${API_BASE_URL}/api/ondemand/parse-resume`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ text: normalizedText })
+                });
 
-             // HYBRID MERGE STRATEGY
-             // Helper to sanitize education years
-             const sanitizeEducation = (eduList: any[]) => {
-                 return eduList.map(edu => {
-                     let year = parseInt(edu.year);
-                     if (isNaN(year)) {
-                         // Try to extract last 4 digit number (e.g. from "2020-2024")
-                         const matches = edu.year.toString().match(/(\d{4})/g);
-                         if (matches && matches.length > 0) {
-                             year = parseInt(matches[matches.length - 1]);
-                         } else {
-                             year = new Date().getFullYear(); // Default to current if completely unknown
-                         }
-                     }
-                     return { ...edu, year };
-                 });
-             };
+                if (aiResponse.ok) {
+                    const aiResData = await aiResponse.json();
+                    if (aiResData.success && aiResData.data) {
+                        const aiData = aiResData.data;
+                        usedAI = true;
 
-             finalData = {
-                 ...regexData,
 
-                 // Prefer AI content for complex structures
-                 experience: (aiData.experience && aiData.experience.length > 0) ? aiData.experience : regexData.experience,
-                 projects: (aiData.projects && aiData.projects.length > 0) ? aiData.projects : regexData.projects,
-                 education: (aiData.education && aiData.education.length > 0) ? sanitizeEducation(aiData.education) : regexData.education,
-                 skills: (aiData.skills && aiData.skills.length > 0) ? aiData.skills : regexData.skills,
+                        // HYBRID MERGE STRATEGY
+                        // Helper to sanitize education years
+                        const sanitizeEducation = (eduList: any[]) => {
+                            return eduList.map(edu => {
+                                let year = parseInt(edu.year);
+                                if (isNaN(year)) {
+                                    // Try to extract last 4 digit number (e.g. from "2020-2024")
+                                    const matches = edu.year.toString().match(/(\d{4})/g);
+                                    if (matches && matches.length > 0) {
+                                        year = parseInt(matches[matches.length - 1]);
+                                    } else {
+                                        year = new Date().getFullYear(); // Default to current if completely unknown
+                                    }
+                                }
+                                return { ...edu, year };
+                            });
+                        };
 
-                 // Smart Personal Info Merge
-                 personalInfo: {
-                     ...regexData.personalInfo,
-                     fullName: aiData.personalInfo?.fullName || regexData.personalInfo?.fullName || '',
-                     bio: aiData.personalInfo?.bio || ''
-                 }
-             };
+                        finalData = {
+                            ...regexData,
+
+                            // Prefer AI content for complex structures
+                            experience: (aiData.experience && aiData.experience.length > 0) ? aiData.experience : regexData.experience,
+                            projects: (aiData.projects && aiData.projects.length > 0) ? aiData.projects : regexData.projects,
+                            education: (aiData.education && aiData.education.length > 0) ? sanitizeEducation(aiData.education) : regexData.education,
+                            skills: (aiData.skills && aiData.skills.length > 0) ? aiData.skills : regexData.skills,
+
+                            // Smart Personal Info Merge
+                            personalInfo: {
+                                ...regexData.personalInfo,
+                                fullName: aiData.personalInfo?.fullName || regexData.personalInfo?.fullName || '',
+                                bio: aiData.personalInfo?.bio || ''
+                            }
+                        };
+                    }
+                }
+            }
         } catch (aiError) {
             console.warn("OnDemand AI Parsing failed, falling back to regex:", aiError);
             warnings.push("AI Parsing failed. Using standard parser.");

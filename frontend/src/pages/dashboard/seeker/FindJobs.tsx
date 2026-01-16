@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { JobCard, Job } from '@/components/dashboard/JobCard';
 import { Checkbox } from '@/components/ui/checkbox';
-import { fetchRecommendedJobs } from '@/lib/auth-api';
 
 const FILTERS = [
   { category: 'Job Type', key: 'type', options: ['Full-time', 'Part-time', 'Contract', 'Internship'] },
@@ -20,15 +19,24 @@ export const FindJobs = () => {
     type: [],
     workMode: [],
   });
-  const [sortBy, setSortBy] = useState<'match' | 'newest' | 'salary'>('match');
+  const [sortBy, setSortBy] = useState<'match' | 'newest' | 'salary'>('newest');
 
   useEffect(() => {
     const loadJobs = async () => {
       try {
         const token = localStorage.getItem('authToken');
         if (token) {
-          const data = await fetchRecommendedJobs(token);
-          setJobs(data);
+          const response = await fetch('/api/jobs', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setJobs(data.data || []);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch jobs', error);

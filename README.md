@@ -1,89 +1,105 @@
-# YuvaSetu - Your Career Compass
+# 🧠 YuvaSetu - Job Application Platform
 
-Welcome to **YuvaSetu**, a comprehensive platform designed to guide students and job seekers in their career journeys. This project is structured as a monorepo containing both the frontend application and backend services.
+Welcome to **YuvaSetu**! This is a website where you can find jobs and employers can find great candidates.
+This guide will help you start the project on your computer, even if you are new to coding!
 
-## 📂 Project Structure
+---
 
-- **`frontend/`**: The user interface built with React, Vite, TypeScript, and Tailwind CSS.
-- **`backend/`**: The backend services and logic (Under Development).
+## 🛠️ Step 1: Install What You Need (Prerequisites)
 
-## 🚀 Getting Started
+Before you start, make sure you have these two programs installed on your computer.
 
-### Prerequisites
+1.  **Node.js** (The engine that runs the code)
+    - Download it here: [https://nodejs.org/](https://nodejs.org/)
+    - Install the "LTS" version (Recommended for Most Users).
+2.  **Git** (To manage the code)
+    - Download it here: [https://git-scm.com/downloads](https://git-scm.com/downloads)
 
-Ensure you have the following installed:
+---
 
-- [Node.js](https://nodejs.org/) (Latest LTS recommended)
-- [npm](https://www.npmjs.com/)
+## 🚀 Step 2: Download the Project
 
-### Installation
-
-1.  **Clone the repository:**
-
+1.  Open a folder on your computer where you want to keep this project.
+2.  Right-click and select "**Open in Terminal**" (or Command Prompt).
+3.  Type this command to download the code:
     ```bash
-    git clone https://github.com/Shubhk-2005/yuvasetu-your-career-compass.git
+    git clone <YOUR_REPOSITORY_URL_HERE>
+    ```
+4.  Go into the project folder:
+    ```bash
     cd Hack_DTU_Main
     ```
 
-2.  **Install dependencies:**
-    Run the following command from the root directory to install dependencies for the frontend workspace:
+---
+
+## ⚙️ Step 3: Setup the Backend (The Brain)
+
+The "Backend" handles the database and the logic.
+
+1.  Open a **New Terminal** window.
+2.  Go to the backend folder:
+    ```bash
+    cd backend
+    ```
+3.  Install the necessary libraries:
     ```bash
     npm install
     ```
+4.  **Create the Secret Password File (.env)**:
+    - Create a new file named `.env` inside the `backend` folder.
+    - Copy everything from `.env.example` into `.env`.
+    - _Ask the project owner for the real values if you don't have them!_
 
-### 🛠 Running the Project
+---
 
-You can execute project commands directly from the root directory. These commands are delegated to the `frontend` workspace for convenience.
+## 🎨 Step 4: Setup the Frontend (The Face)
 
-- **Start Development Server:**
+The "Frontend" is what you see in the browser.
 
-  ```bash
-  npm run dev
-  ```
+1.  Open **Another New Terminal** window.
+2.  Go to the frontend folder:
 
-  Runs the frontend app in development mode. Open [http://localhost:8080](http://localhost:8080) to view it in the browser.
+    ```bash
+    cd frontend
+    ```
 
-- **Build for Production:**
+3.  Install the necessary libraries:
+    ```bash
+    npm install
+    ```
+4.  **Create the Secret Password File (.env)**:
+    - Create a new file named `.env` inside the `frontend` folder.
+    - Copy everything from `.env.example` into `.env`.
 
-  ```bash
-  npm run build
-  ```
+---
 
-  Builds the frontend application for production.
+## 🚀 Step 5: Run the Project
 
-- **Lint Code:**
+Now that both Backend and Frontend are set up, you can run them together from the main folder!
 
-  ```bash
-  npm run lint
-  ```
+1.  Go back to the main folder (if you are not already there):
+    ```bash
+    cd ..
+    ```
+2.  Start the development server:
 
-  Runs ESLint to check for code quality issues.
+    ```bash
+    npm run dev
+    ```
 
-- **Preview Production Build:**
-  ```bash
-  npm run preview
-  ```
-  Locally preview the production build.
+    This command will start both the backend server (on port 5000) and the frontend server (on port 5173) concurrently.
 
-## 💻 Technologies Used
+    - **Frontend**: `http://localhost:5173` (Open this to see the website!)
+    - **Backend**: `http://localhost:5000`
 
-### Frontend
+---
 
-- **Framework**: [React](https://react.dev/) + [Vite](https://vitejs.dev/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
-- **State Management**: React Query (@tanstack/react-query)
-- **Routing**: React Router DOM
+## 🐞 Troubleshooting (If things go wrong)
 
-### Backend
+- **"Command not found"**: Make sure you installed Node.js in Step 1.
+- **"MongoDB Connection Error"**: Check if your `.env` file in the `backend` folder has the correct `MONGO_URI`.
+- **"Port already in use"**: This means another program is using the same port. Close other terminals or restart your computer.
 
-- Node.js (In Progress)
+---
 
-## 🤝 Contributing
-
-1.  Fork the repository.
-2.  Create a new branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
+**Happy Coding!** 🚀

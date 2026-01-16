@@ -25,7 +25,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     useEffect(() => {
         // Initialize Socket
         // @ts-ignore
-        /*
         const socketInstance = io(import.meta.env.VITE_API_URL || 'http://localhost:5000');
 
         socketInstance.on('connect', () => {
@@ -65,8 +64,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return () => {
             socketInstance.disconnect();
         };
-        */
-       console.log("Socket connection disabled for dummy data mode.");
     }, []);
 
     // Listen for storage changes (login/logout) to rejoin room?

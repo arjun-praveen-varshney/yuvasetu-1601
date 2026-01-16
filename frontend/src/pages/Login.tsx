@@ -168,17 +168,6 @@ export const LoginPage = () => {
 
     try {
       if (isLogin) {
-        // --- DEMO LOGIN BYPASS ---
-        if (email === 'demo@yuvasetu.com' && password === 'password') {
-             console.log("Demo Login Bypass");
-             const token = "dummy-token-123";
-             localStorage.setItem('authToken', token);
-             toast.success('Welcome back (Demo Mode)!');
-             navigate(isSeeker ? '/dashboard' : '/dashboard/employer');
-             setIsLoading(false);
-             return;
-        }
-
         // --- STRICT LOGIN FLOW ---
         // Set session persistence based on "Remember Me" checkbox
         await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
@@ -186,8 +175,7 @@ export const LoginPage = () => {
         const user = userCredential.user;
 
         // 1. CHECK EMAIL VERIFICATION
-        // (Optional: You can disable this check for demo users if you want, but sticking to logic)
-        if (!user.emailVerified && email !== 'demo@yuvasetu.com') {
+        if (!user.emailVerified) {
           await signOut(auth);
           toast.error('Email not verified', {
             description: 'Please check your inbox and verify your email before logging in.',

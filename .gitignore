@@ -1,35 +1,109 @@
 # Dependencies
 node_modules/
+pnpm-lock.yaml
+yarn.lock
+bun.lockb
+package-lock.json
 .pnp
 .pnp.js
 
 # Testing
 coverage/
+.nyc_output/
+*.lcov
+.jest/
 
 # Production
 build/
 dist/
 out/
+.next/
 
-# Misc
-.DS_Store
+# Environment variables
 .env
 .env.local
+.env.*.local
 .env.development.local
 .env.test.local
 .env.production.local
-.gemini/
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
 
-# Editor directories and files
-.idea
-.vscode
-*.suo
-*.ntvs
-*.njsproj
-*.sln
-*.sw?
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode-test/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+.cache/
+.parcel-cache
+
+# TypeScript
+*.tsbuildinfo
+
+# Webpack
+.webpack/
+
+# Runtime data
+pids/
+*.seed
+*.pid.lock
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Project specific
+backend/uploads/
+backend/dist/
+frontend/dist/
+.env.*.local
+
+# Miscellaneous
+.eslintcache
+.stylelintcache
+*.bak
+.npm
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*

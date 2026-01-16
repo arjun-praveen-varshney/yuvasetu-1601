@@ -1,4 +1,4 @@
-import { ArrowLeft, MapPin, Banknote, Clock, Users, Mail, FileText, Check, X, Calendar, Loader2, Archive, Sparkles, User } from 'lucide-react';
+import { ArrowLeft, MapPin, Banknote, Clock, Users, Mail, FileText, Check, X, Calendar, Loader2, Archive, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { fetchJobById, updateJob, fetchRecommendedCandidates } from '@/lib/auth-api';
+import { fetchJobById, updateJob } from '@/lib/auth-api';
 import { fetchJobCandidates, updateApplicationStatus } from '@/lib/api/jobs';
 
 export const JobPostingDetail = () => {
@@ -18,7 +18,6 @@ export const JobPostingDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [candidates, setCandidates] = useState<any[]>([]);
-  const [suggestedCandidates, setSuggestedCandidates] = useState<any[]>([]);
 
   useEffect(() => {
     const loadJob = async () => {
@@ -36,14 +35,6 @@ export const JobPostingDetail = () => {
           setCandidates(fullCandidates);
         } catch (candError) {
           console.error("Failed to load candidates", candError);
-        }
-
-        // 3. Fetch AI Recommendations
-        try {
-          const suggestions = await fetchRecommendedCandidates(token, id);
-          setSuggestedCandidates(suggestions);
-        } catch (suggestionError) {
-          console.error("Failed to load suggestions", suggestionError);
         }
 
       } catch (error) {
@@ -179,68 +170,13 @@ export const JobPostingDetail = () => {
         </div>
       </div>
 
-      {/* Candidates Tabs */}
-      <Tabs defaultValue="suggestions" className="w-full">
+      {/* Candidates Tab */}
+      <Tabs defaultValue="applicants" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="suggestions" className="gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
-            Top AI Matches <Badge variant="secondary" className="ml-2">{suggestedCandidates.length}</Badge>
-          </TabsTrigger>
           <TabsTrigger value="applicants">
             Applicants <Badge variant="secondary" className="ml-2">{candidates.length}</Badge>
           </TabsTrigger>
         </TabsList>
-
-        <TabsContent value="suggestions">
-          <div className="bg-card border border-border rounded-3xl overflow-hidden p-6 space-y-4">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-bold text-xl">Recommended Candidates</h2>
-              <p className="text-sm text-muted-foreground">Sorted by semantic match score.</p>
-            </div>
-
-            {suggestedCandidates.length === 0 ? (
-              <div className="text-center py-12 border border-dashed rounded-xl">
-                <Users className="w-10 h-10 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-muted-foreground">No recommendations found yet. Candidates must have updated profiles.</p>
-              </div>
-            ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {suggestedCandidates.map((candidate) => (
-                  <div key={candidate.id} className="border border-border p-4 rounded-xl hover:border-primary/50 transition-colors bg-muted/20">
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
-                          {candidate.personalInfo?.fullName?.[0] || <User className="w-4 h-4" />}
-                        </div>
-                        <div>
-                          <h3 className="font-bold">{candidate.personalInfo?.fullName || "Anonymous User"}</h3>
-                          <p className="text-xs text-muted-foreground">{candidate.personalInfo?.email}</p>
-                        </div>
-                      </div>
-                      <Badge variant="outline" className="bg-green-500/10 text-green-600 border-green-500/20 font-bold">
-                        {candidate.matchScore}% Match
-                      </Badge>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {candidate.skills?.slice(0, 4).map((skill: string) => (
-                        <Badge key={skill} variant="secondary" className="text-[10px]">{skill}</Badge>
-                      ))}
-                      {candidate.skills?.length > 4 && <span className="text-xs text-muted-foreground self-center">+{candidate.skills.length - 4} more</span>}
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => navigate(`/dashboard/employer/candidate/${candidate.userId}`)}
-                    >
-                      View Profile
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </TabsContent>
 
         <TabsContent value="applicants">
           <div className="bg-card border border-border rounded-3xl overflow-hidden p-6">
