@@ -1,4 +1,4 @@
-import { MapPin, Building2, Banknote, Clock, Heart, CheckCircle2, Info } from 'lucide-react';
+import { MapPin, Building2, Banknote, Clock, Heart, CheckCircle2, ThumbsUp, ThumbsDown, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { VectorMatchAnimation } from './VectorMatchAnimation';
 
 export interface Job {
   id: string;
@@ -49,9 +50,22 @@ export const JobCard = ({ job, isApplied = false, filters }: {
   filters?: { location: string; minSalary: number;[key: string]: any };
 }) => {
   const navigate = useNavigate();
+  const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
 
   const handleApply = () => {
     navigate(`/dashboard/jobs/${job.id}/apply`, { state: { job } });
+  };
+
+  const handleFeedback = (type: 'up' | 'down') => {
+    setFeedback(type);
+    toast.success(
+      type === 'up'
+        ? "Great! We'll show you more jobs like this."
+        : "Thanks! We'll show fewer jobs like this.",
+      {
+        description: "Your feedback helps improve recommendations",
+      }
+    );
   };
 
   return (
@@ -78,6 +92,31 @@ export const JobCard = ({ job, isApplied = false, filters }: {
               'bg-muted text-muted-foreground border-border'
             }`}>
             {job.matchScore}% Match
+          </div>
+
+
+          {/* Recommendation Feedback */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-7 w-7 ${feedback === 'up' ? 'text-green-500' : 'text-muted-foreground hover:text-green-500'}`}
+              onClick={() => handleFeedback('up')}
+              title="More like this"
+              aria-label="Show more jobs like this"
+            >
+              <ThumbsUp className={`w-4 h-4 ${feedback === 'up' ? 'fill-green-500' : ''}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`h-7 w-7 ${feedback === 'down' ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
+              onClick={() => handleFeedback('down')}
+              title="Fewer like this"
+              aria-label="Show fewer jobs like this"
+            >
+              <ThumbsDown className={`w-4 h-4 ${feedback === 'down' ? 'fill-red-500' : ''}`} />
+            </Button>
           </div>
 
           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500" aria-label="Save this job">

@@ -269,6 +269,32 @@ export const fetchJobById = async (token: string, id: string) => {
     return resData.data;
 };
 
+export const fetchRecommendedJobs = async (token: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/recommendations/jobs`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    const resData: APIResponse = await response.json();
+    if (!response.ok) throw new Error(resData.message || 'Failed to fetch recommended jobs');
+    return resData.data;
+};
+
+export const fetchRecommendedCandidates = async (token: string, jobId: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/recommendations/candidates/${jobId}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+    });
+    const resData: APIResponse = await response.json();
+    if (!response.ok) throw new Error(resData.message || 'Failed to fetch candidates');
+    return resData.data;
+};
+
 export const fetchDashboardStats = async (token: string) => {
     const response = await fetch(`${API_BASE_URL}/api/job-seeker/dashboard-stats`, {
         method: 'GET',
@@ -323,5 +349,19 @@ export const fetchCandidateById = async (token: string, userId: string) => {
     });
     const resData: APIResponse = await response.json();
     if (!response.ok) throw new Error(resData.message || 'Failed to fetch candidate');
+    return resData.data;
+};
+
+export const analyzeSkillGap = async (token: string, jobId: string) => {
+    const response = await fetch(`${API_BASE_URL}/api/ondemand/analyze-gap`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ jobId }),
+    });
+    const resData: APIResponse = await response.json();
+    if (!response.ok) throw new Error(resData.message || 'Failed to analyze skill gap');
     return resData.data;
 };

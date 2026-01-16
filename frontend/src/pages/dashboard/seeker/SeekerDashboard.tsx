@@ -4,7 +4,7 @@ import { JobCard } from "@/components/dashboard/JobCard";
 import { JobFiltersWidget, JobFiltersState } from "@/components/dashboard/JobFiltersWidget";
 import { JobCardSkeleton } from "@/components/dashboard/JobCardSkeleton";
 import { useState, useEffect, useMemo } from "react";
-import { getJobSeekerProfile, fetchDashboardStats } from "@/lib/auth-api";
+import { fetchRecommendedJobs, getJobSeekerProfile, fetchDashboardStats } from "@/lib/auth-api";
 import { useToast } from "@/hooks/use-toast";
 
 export const SeekerDashboard = () => {
@@ -38,18 +38,9 @@ export const SeekerDashboard = () => {
           const dashboardStats = await fetchDashboardStats(token);
           setStats(dashboardStats);
 
-          // 3. Fetch Jobs
-          const response = await fetch('/api/jobs', {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-          if (response.ok) {
-            const data = await response.json();
-            setRecommendedJobs(data.data || []);
-          }
+          // 3. Fetch Recommendations
+          const jobs = await fetchRecommendedJobs(token);
+          setRecommendedJobs(jobs);
         }
       } catch (err) {
         console.error("Failed to fetch dashboard data", err);
@@ -130,7 +121,7 @@ export const SeekerDashboard = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+    <div className="max-w-7xl mx-auto space-y-8 animate-fade-in relative">
       {/* Welcome & Stats Section */}
       {/* Welcome & Stats Section */}
       <div className="flex flex-col xl:flex-row justify-between items-end gap-6">
@@ -239,6 +230,9 @@ export const SeekerDashboard = () => {
           <JobFiltersWidget filters={filters} setFilters={setFilters} />
         </div>
       </div>
+
+
+
     </div>
   );
 };
