@@ -174,14 +174,3 @@ export const deleteJob = async (req: Request, res: Response) => {
         return sendError(res, 500, 'Failed to delete job');
     }
 };
-export const getAllPublishedJobs = async (req: Request, res: Response) => {
-    try {
-        const jobs = await Job.find({ status: JobStatus.PUBLISHED })
-            .populate('companyProfileId', 'companyName logoUrl')
-            .sort({ createdAt: -1 });
-        
-        return sendSuccess(res, jobs, 'Published jobs fetched successfully');
-    } catch (error) {
-        return sendError(res, 500, 'Failed to fetch jobs');
-    }
-};
