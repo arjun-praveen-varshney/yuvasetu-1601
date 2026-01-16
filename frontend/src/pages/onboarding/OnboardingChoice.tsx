@@ -1,11 +1,21 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { FileUp, Keyboard, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export const OnboardingChoice = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [hoveredOption, setHoveredOption] = useState<'resume' | 'manual' | null>(null);
+
+  // If in edit mode, proceed to form logic (which might be passed down)
+  const handleManualClick = () => {
+    navigate('/onboarding/form', { state: location.state });
+  };
+
+  const handleUploadClick = () => {
+    navigate('/onboarding/upload', { state: location.state });
+  };
 
   return (
     <div className="space-y-12 text-center">
@@ -20,15 +30,14 @@ export const OnboardingChoice = () => {
 
       <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
         {/* Option 1: Upload Resume (Primary) */}
-        <div 
-          className={`relative group rounded-3xl p-8 cursor-pointer transition-all duration-300 border-2 ${
-            hoveredOption === 'resume' 
-              ? 'bg-card border-primary shadow-2xl scale-[1.02] ring-4 ring-primary/10' 
-              : 'bg-card/50 border-border shadow-soft hover:bg-card'
-          }`}
+        <div
+          className={`relative group rounded-3xl p-8 cursor-pointer transition-all duration-300 border-2 ${hoveredOption === 'resume'
+            ? 'bg-card border-primary shadow-2xl scale-[1.02] ring-4 ring-primary/10'
+            : 'bg-card/50 border-border shadow-soft hover:bg-card'
+            }`}
           onMouseEnter={() => setHoveredOption('resume')}
           onMouseLeave={() => setHoveredOption(null)}
-          onClick={() => navigate('/onboarding/upload')}
+          onClick={handleUploadClick}
         >
           {/* Badge */}
           <div className="absolute -top-4 left-1/2 -translate-x-1/2">
@@ -39,23 +48,22 @@ export const OnboardingChoice = () => {
           </div>
 
           <div className="h-full flex flex-col items-center text-center space-y-6 pt-4">
-            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center transition-colors duration-300 ${
-              hoveredOption === 'resume' ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
-            }`}>
+            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center transition-colors duration-300 ${hoveredOption === 'resume' ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
+              }`}>
               <FileUp className="w-10 h-10" />
             </div>
 
             <div className="space-y-2">
               <h3 className="font-display text-2xl font-bold">Upload Resume</h3>
               <p className="text-muted-foreground">
-                We'll magically extract your details. <br/>
+                We'll magically extract your details. <br />
                 Fastest way to get started.
               </p>
             </div>
 
             <div className="flex-1 w-full flex items-end justify-center pt-4">
-              <Button 
-                variant={hoveredOption === 'resume' ? 'seeker' : 'outline'} 
+              <Button
+                variant={hoveredOption === 'resume' ? 'seeker' : 'outline'}
                 className={`w-full gap-2 transition-all duration-300`}
               >
                 Auto-Fill Profile
@@ -66,34 +74,32 @@ export const OnboardingChoice = () => {
         </div>
 
         {/* Option 2: Manual (Secondary) */}
-        <div 
-          className={`relative group rounded-3xl p-8 cursor-pointer transition-all duration-300 border-2 ${
-            hoveredOption === 'manual' 
-              ? 'bg-card border-accent shadow-2xl scale-[1.02] ring-4 ring-accent/10' 
-              : 'bg-card/50 border-border shadow-soft hover:bg-card'
-          }`}
+        <div
+          className={`relative group rounded-3xl p-8 cursor-pointer transition-all duration-300 border-2 ${hoveredOption === 'manual'
+            ? 'bg-card border-accent shadow-2xl scale-[1.02] ring-4 ring-accent/10'
+            : 'bg-card/50 border-border shadow-soft hover:bg-card'
+            }`}
           onMouseEnter={() => setHoveredOption('manual')}
           onMouseLeave={() => setHoveredOption(null)}
-          onClick={() => navigate('/onboarding/form')}
+          onClick={handleManualClick}
         >
           <div className="h-full flex flex-col items-center text-center space-y-6 pt-4">
-            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center transition-colors duration-300 ${
-              hoveredOption === 'manual' ? 'bg-accent/20 text-accent' : 'bg-muted text-muted-foreground'
-            }`}>
+            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center transition-colors duration-300 ${hoveredOption === 'manual' ? 'bg-accent/20 text-accent' : 'bg-muted text-muted-foreground'
+              }`}>
               <Keyboard className="w-10 h-10" />
             </div>
 
             <div className="space-y-2">
               <h3 className="font-display text-2xl font-bold">Fill Manually</h3>
               <p className="text-muted-foreground">
-                Start from scratch. Control every detail <br/>
+                Start from scratch. Control every detail <br />
                 step-by-step.
               </p>
             </div>
 
             <div className="flex-1 w-full flex items-end justify-center pt-4">
-              <Button 
-                variant={hoveredOption === 'manual' ? 'employer' : 'outline'} 
+              <Button
+                variant={hoveredOption === 'manual' ? 'employer' : 'outline'}
                 className={`w-full gap-2 transition-all duration-300`}
               >
                 Enter Details

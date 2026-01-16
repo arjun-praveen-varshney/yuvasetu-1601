@@ -16,8 +16,8 @@ export const PersonalDetails = () => {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="fullName">Full Name</Label>
-          <Input 
-            id="fullName" 
+          <Input
+            id="fullName"
             value={personalInfo.fullName}
             onChange={(e) => handleChange('fullName', e.target.value)}
             placeholder="John Doe"
@@ -25,8 +25,8 @@ export const PersonalDetails = () => {
         </div>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input 
-            id="email" 
+          <Input
+            id="email"
             type="email"
             value={personalInfo.email}
             onChange={(e) => handleChange('email', e.target.value)}
@@ -35,20 +35,32 @@ export const PersonalDetails = () => {
         </div>
         <div className="space-y-2">
           <Label htmlFor="phone">Phone Number</Label>
-          <Input 
-            id="phone" 
+          <Input
+            id="phone"
             type="tel"
             value={personalInfo.phone}
             onChange={(e) => handleChange('phone', e.target.value)}
             placeholder="+91 98765 43210"
           />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="age">Age</Label>
+          <Input
+            id="age"
+            type="number"
+            min="18"
+            max="120"
+            value={personalInfo.age || ''}
+            onChange={(e) => handleChange('age', e.target.value)}
+            placeholder="18+"
+          />
+        </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="bio">Professional Bio</Label>
-        <Textarea 
-          id="bio" 
+        <Textarea
+          id="bio"
           value={personalInfo.bio || ''}
           onChange={(e) => handleChange('bio', e.target.value)}
           placeholder="Tell us a bit about yourself..."
@@ -56,34 +68,48 @@ export const PersonalDetails = () => {
         />
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="languages">Languages</Label>
+        <Input
+          id="languages"
+          value={personalInfo.languages || ''}
+          onChange={(e) => handleChange('languages', e.target.value)}
+          placeholder="English, Spanish, French..."
+        />
+        <p className="text-xs text-slate-500">Separate multiple languages with commas.</p>
+      </div>
+
       <div className="space-y-4 pt-4 border-t border-border">
         <h3 className="font-semibold text-lg">Online Presence</h3>
         <div className="grid md:grid-cols-3 gap-6">
           <div className="space-y-2">
             <Label htmlFor="linkedin">LinkedIn URL</Label>
-            <Input 
-              id="linkedin" 
+            <Input
+              id="linkedin"
+              type="url"
               value={personalInfo.linkedin || ''}
               onChange={(e) => handleChange('linkedin', e.target.value)}
-              placeholder="linkedin.com/in/..."
+              placeholder="https://linkedin.com/in/..."
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="github">GitHub URL</Label>
-            <Input 
-              id="github" 
+            <Input
+              id="github"
+              type="url"
               value={personalInfo.github || ''}
               onChange={(e) => handleChange('github', e.target.value)}
-              placeholder="github.com/..."
+              placeholder="https://github.com/..."
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="portfolio">Portfolio URL</Label>
-            <Input 
-              id="portfolio" 
+            <Input
+              id="portfolio"
+              type="url"
               value={personalInfo.portfolio || ''}
               onChange={(e) => handleChange('portfolio', e.target.value)}
-              placeholder="yourwebsite.com"
+              placeholder="https://yourwebsite.com"
             />
           </div>
         </div>

@@ -1,15 +1,17 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, FileText, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { Upload, FileText, CheckCircle2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { ConfidenceBar } from '@/components/Resume/ConfidenceBar';
 import { toast } from 'sonner';
 
 export const ResumeUpload = () => {
   const navigate = useNavigate();
-  const { simulateResumeParsing, isParsing } = useOnboarding();
+  const { parseResume, isParsing, parsingConfidence, parsingWarnings } = useOnboarding();
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [hasAttemptedParsing, setHasAttemptedParsing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -25,7 +27,7 @@ export const ResumeUpload = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const droppedFile = e.dataTransfer.files[0];
     validateAndSetFile(droppedFile);
   };
@@ -36,30 +38,46 @@ export const ResumeUpload = () => {
     }
   };
 
-  const validateAndSetFile = (file: File) => {
-    const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-    if (!validTypes.includes(file.type)) {
-      toast.error('Invalid file type. Please upload a PDF or DOCX.');
+  const validateAndSetFile = async (selectedFile: File) => {
+    // Only allow PDF for deterministic parsing
+    if (selectedFile.type !== 'application/pdf') {
+      toast.error('Please upload a PDF file for best results.');
       return;
     }
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (selectedFile.size > 5 * 1024 * 1024) {
       toast.error('File too large. Max size is 5MB.');
       return;
     }
-    setFile(file);
+
+    setFile(selectedFile);
+    setHasAttemptedParsing(false);
+
+    // Auto-parse on file selection
+    try {
+      const result = await parseResume(selectedFile);
+      setHasAttemptedParsing(true);
+
+      if (result.sectionsFound.includes('AI Analyzed')) {
+        toast.success('Resume analyzed by OnDemand AI (High Accuracy)');
+      } else if (result.confidence >= 70) {
+        toast.success('Resume parsed successfully! Please review the data.');
+      } else if (result.confidence >= 30) {
+        toast.warning('Some sections need review. Please check all fields.');
+      } else {
+        toast.error('Could not reliably parse resume. Please fill manually.');
+      }
+    } catch (error) {
+      console.error('Parse error:', error);
+      setHasAttemptedParsing(true);
+    }
   };
 
-  const handleUpload = async () => {
-    if (!file) return;
-    
-    try {
-      await simulateResumeParsing(file);
-      toast.success('Resume parsed successfully!');
-      navigate('/onboarding/form');
-    } catch (error) {
-      toast.error('Failed to parse resume. Please try manual entry.');
-      console.error(error);
-    }
+  const handleContinue = () => {
+    navigate('/onboarding/form');
+  };
+
+  const handleManualEntry = () => {
+    navigate('/onboarding/form');
   };
 
   return (
@@ -67,20 +85,19 @@ export const ResumeUpload = () => {
       <div className="text-center space-y-4">
         <h1 className="font-display text-4xl font-bold">Upload Your Resume</h1>
         <p className="text-muted-foreground text-lg">
-          We'll analyze your resume to auto-fill your profile details. <br/>
-          You can review and edit everything in the next step.
+          We'll extract your details to pre-fill the form. <br />
+          You can review and edit everything before submission.
         </p>
       </div>
 
       {/* Upload Zone */}
       <div
-        className={`relative border-2 border-dashed rounded-3xl p-12 transition-all duration-300 text-center cursor-pointer ${
-          isDragging 
-            ? 'border-primary bg-primary/5 scale-[1.02]' 
-            : file 
-              ? 'border-primary/50 bg-card' 
-              : 'border-border bg-card/50 hover:bg-card hover:border-primary/50'
-        }`}
+        className={`relative border-2 border-dashed rounded-3xl p-12 transition-all duration-300 text-center cursor-pointer ${isDragging
+          ? 'border-primary bg-primary/5 scale-[1.02]'
+          : file
+            ? 'border-primary/50 bg-card'
+            : 'border-border bg-card/50 hover:bg-card hover:border-primary/50'
+          }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -90,7 +107,7 @@ export const ResumeUpload = () => {
           type="file"
           ref={fileInputRef}
           className="hidden"
-          accept=".pdf,.docx"
+          accept=".pdf"
           onChange={handleFileChange}
           disabled={isParsing}
         />
@@ -106,7 +123,7 @@ export const ResumeUpload = () => {
             </div>
             <div>
               <h3 className="font-semibold text-xl mb-2">Analyzing Resume...</h3>
-              <p className="text-muted-foreground animate-pulse">Extracting skills and experience...</p>
+              <p className="text-muted-foreground animate-pulse">Extracting text and detecting sections...</p>
             </div>
           </div>
         ) : file ? (
@@ -118,7 +135,7 @@ export const ResumeUpload = () => {
               <h3 className="font-semibold text-xl text-primary mb-1">{file.name}</h3>
               <p className="text-sm text-muted-foreground">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
             </div>
-            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setFile(null); }}>
+            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setFile(null); setHasAttemptedParsing(false); }}>
               Change File
             </Button>
           </div>
@@ -129,32 +146,51 @@ export const ResumeUpload = () => {
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold text-xl">Click to upload or drag and drop</h3>
-              <p className="text-muted-foreground">PDF or DOCX (max. 5MB)</p>
+              <p className="text-muted-foreground">PDF only (max. 5MB)</p>
             </div>
           </div>
         )}
       </div>
 
+      {/* Confidence Bar - Shown after parsing attempt */}
+      {hasAttemptedParsing && (
+        <ConfidenceBar
+          confidence={parsingConfidence}
+          warnings={parsingWarnings}
+        />
+      )}
+
+      {/* Action Buttons */}
       <div className="flex justify-between items-center pt-4">
         <Button variant="ghost" onClick={() => navigate('/onboarding')} disabled={isParsing}>
           Back
         </Button>
-        <Button 
-          variant="seeker" 
-          size="lg" 
-          onClick={handleUpload} 
-          disabled={!file || isParsing}
-          className="min-w-[200px]"
-        >
-          {isParsing ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            'Continue'
-          )}
-        </Button>
+
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={handleManualEntry}
+            disabled={isParsing}
+          >
+            Fill Manually
+          </Button>
+          <Button
+            variant="seeker"
+            size="lg"
+            onClick={handleContinue}
+            disabled={!file || isParsing}
+            className="min-w-[200px]"
+          >
+            {isParsing ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              'Continue to Review'
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

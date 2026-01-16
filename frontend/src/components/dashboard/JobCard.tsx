@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { VectorMatchAnimation } from './VectorMatchAnimation';
 
 export interface Job {
   id: string;
@@ -30,13 +31,24 @@ export interface Job {
   type: string;
   postedAt: string;
   matchScore: number;
+  matchDetails?: {
+    skills: number;
+    experience: number;
+    location: number;
+    salary: number;
+  };
   skills: string[];
   description?: string;
   requirements?: string[];
   benefits?: string[];
+  hasApplied?: boolean;
 }
 
-export const JobCard = ({ job, isApplied = false }: { job: Job; isApplied?: boolean }) => {
+export const JobCard = ({ job, isApplied = false, filters }: {
+  job: Job;
+  isApplied?: boolean;
+  filters?: { location: string; minSalary: number;[key: string]: any };
+}) => {
   const navigate = useNavigate();
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
 
@@ -47,8 +59,8 @@ export const JobCard = ({ job, isApplied = false }: { job: Job; isApplied?: bool
   const handleFeedback = (type: 'up' | 'down') => {
     setFeedback(type);
     toast.success(
-      type === 'up' 
-        ? "Great! We'll show you more jobs like this." 
+      type === 'up'
+        ? "Great! We'll show you more jobs like this."
         : "Thanks! We'll show fewer jobs like this.",
       {
         description: "Your feedback helps improve recommendations",
@@ -75,20 +87,19 @@ export const JobCard = ({ job, isApplied = false }: { job: Job; isApplied?: bool
         </div>
         <div className="flex flex-col items-end gap-2">
           {/* Match Score with Distribution Breakdown */}
-          <div className={`px-3 py-1 rounded-full text-xs font-bold border ${
-            job.matchScore >= 90 ? 'bg-green-500/10 text-green-600 border-green-500/20' :
+          <div className={`px-3 py-1 rounded-full text-xs font-bold border ${job.matchScore >= 90 ? 'bg-green-500/10 text-green-600 border-green-500/20' :
             job.matchScore >= 75 ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20' :
-            'bg-muted text-muted-foreground border-border'
-          }`}>
+              'bg-muted text-muted-foreground border-border'
+            }`}>
             {job.matchScore}% Match
           </div>
-          
-          
+
+
           {/* Recommendation Feedback */}
           <div className="flex items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className={`h-7 w-7 ${feedback === 'up' ? 'text-green-500' : 'text-muted-foreground hover:text-green-500'}`}
               onClick={() => handleFeedback('up')}
               title="More like this"
@@ -96,9 +107,9 @@ export const JobCard = ({ job, isApplied = false }: { job: Job; isApplied?: bool
             >
               <ThumbsUp className={`w-4 h-4 ${feedback === 'up' ? 'fill-green-500' : ''}`} />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className={`h-7 w-7 ${feedback === 'down' ? 'text-red-500' : 'text-muted-foreground hover:text-red-500'}`}
               onClick={() => handleFeedback('down')}
               title="Fewer like this"
@@ -107,7 +118,7 @@ export const JobCard = ({ job, isApplied = false }: { job: Job; isApplied?: bool
               <ThumbsDown className={`w-4 h-4 ${feedback === 'down' ? 'fill-red-500' : ''}`} />
             </Button>
           </div>
-          
+
           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-red-500" aria-label="Save this job">
             <Heart className="w-5 h-5" />
           </Button>
@@ -143,15 +154,15 @@ export const JobCard = ({ job, isApplied = false }: { job: Job; isApplied?: bool
       </div>
 
       <div className="flex gap-3">
-        <Button 
-          variant={isApplied ? "outline" : "seeker"} 
+        <Button
+          variant={(isApplied || job.hasApplied) ? "outline" : "seeker"}
           className="flex-1 w-full"
           onClick={handleApply}
-          disabled={isApplied}
+          disabled={isApplied || job.hasApplied}
         >
-          {isApplied ? "Applied" : "Apply Now"}
+          {(isApplied || job.hasApplied) ? "Applied" : "Apply Now"}
         </Button>
-        
+
         <Sheet>
           <SheetTrigger asChild>
             <Button variant="outline" className="w-full flex-1">View Details</Button>
@@ -173,64 +184,120 @@ export const JobCard = ({ job, isApplied = false }: { job: Job; isApplied?: bool
                 </div>
               </div>
             </SheetHeader>
-            
+
             {/* Match Score Distribution */}
             <div className="bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl p-4 border border-primary/10 mb-4">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-sm flex items-center gap-2">
-                  <Info className="w-4 h-4 text-primary" />
-                  Match Distribution
-                </h3>
+                <HoverCard>
+                  <HoverCardTrigger asChild>
+                    <h3 className="font-bold text-sm flex items-center gap-2 cursor-help underline decoration-dotted decoration-primary/50">
+                      <Info className="w-4 h-4 text-primary" />
+                      Match Distribution
+                    </h3>
+                  </HoverCardTrigger>
+                  <HoverCardContent className="w-80 bg-slate-950 text-slate-50 border-slate-800" align="start">
+                    <div className="space-y-3">
+                      <h4 className="font-bold text-sm text-primary mb-2">Multi-Vector AI Match</h4>
+
+                      {/* Visual Animation */}
+                      <div className="flex justify-center py-2">
+                        <VectorMatchAnimation score={job.matchScore} />
+                      </div>
+
+                      <div className="bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-2 font-mono">
+                        <div className="flex justify-between text-xs items-center">
+                          <span className="text-green-400 flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-green-500"></div> Skills
+                          </span>
+                          <span className="text-slate-400">
+                            {job.matchDetails?.skills || 0}% × 0.50
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs items-center">
+                          <span className="text-blue-400 flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-blue-500"></div> Experience
+                          </span>
+                          <span className="text-slate-400">
+                            {job.matchDetails?.experience || 0}% × 0.30
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs items-center">
+                          <span className="text-purple-400 flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-purple-500"></div> Bio/Fit
+                          </span>
+                          <span className="text-slate-400">
+                            {job.matchDetails?.location || 0}% × 0.20
+                          </span>
+                        </div>
+                        <Separator className="bg-slate-700 my-1" />
+                        <div className="flex justify-between font-bold text-sm pt-1">
+                          <span className="text-white">Total Score</span>
+                          <span className="text-primary">{job.matchScore}%</span>
+                        </div>
+                      </div>
+
+                      <p className="text-[10px] text-slate-400 leading-tight">
+                        We use 3 separate weighted vectors to calculate your perfect match:
+                        <br />
+                        <span className="text-white">Score = (Skills×0.5) + (Exp×0.3) + (Bio×0.2)</span>
+                      </p>
+                    </div>
+                  </HoverCardContent>
+                </HoverCard>
                 <div className="text-2xl font-bold text-primary">{job.matchScore}%</div>
               </div>
-              
+
               <div className="space-y-3">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-xs font-medium">Skills Match</span>
-                    <span className="text-xs font-bold text-green-600">35%</span>
+                    <span className="text-xs font-bold text-green-600">{job.matchDetails?.skills || 85}%</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full" style={{ width: '35%' }} />
+                    <div className="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full" style={{ width: `${job.matchDetails?.skills || 85}%` }} />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-xs font-medium">Experience Level</span>
-                    <span className="text-xs font-bold text-blue-600">25%</span>
+                    <span className="text-xs font-bold text-blue-600">{job.matchDetails?.experience || 78}%</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full" style={{ width: '25%' }} />
+                    <div className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full" style={{ width: `${job.matchDetails?.experience || 78}%` }} />
                   </div>
                 </div>
 
+                {/* Always show Bio/Fit Match (Previously Location) */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-medium">Location</span>
-                    <span className="text-xs font-bold text-purple-600">20%</span>
+                    <span className="text-xs font-medium">Bio & Culture Fit</span>
+                    <span className="text-xs font-bold text-purple-600">{job.matchDetails?.location || 92}%</span>
                   </div>
                   <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full" style={{ width: '20%' }} />
+                    <div className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full" style={{ width: `${job.matchDetails?.location || 92}%` }} />
                   </div>
                 </div>
 
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-medium">Salary Range</span>
-                    <span className="text-xs font-bold text-orange-600">12%</span>
+                {/* Only show Salary Match if user filtered by Min Salary */}
+                {(filters?.minSalary && filters.minSalary > 0) ? (
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-medium">Salary Range</span>
+                      <span className="text-xs font-bold text-orange-600">{job.matchDetails?.salary || 88}%</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full" style={{ width: `${job.matchDetails?.salary || 88}%` }} />
+                    </div>
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-orange-500 to-orange-400 rounded-full" style={{ width: '12%' }} />
-                  </div>
-                </div>
+                ) : null}
               </div>
             </div>
-            
+
             <Separator className="my-4" />
 
             <ScrollArea className="h-[calc(100vh-250px)] pr-6">
-              <div className="space-y-6 pb-6">
+              <div className="space-y-6 pb-32">
                 <div>
                   <h3 className="font-bold text-lg mb-2">About the Role</h3>
                   <p className="text-muted-foreground leading-relaxed">
@@ -241,7 +308,7 @@ export const JobCard = ({ job, isApplied = false }: { job: Job; isApplied?: bool
                 <div>
                   <h3 className="font-bold text-lg mb-3">Key Requirements</h3>
                   <ul className="space-y-2">
-                    {(job.requirements || [
+                    {((job.requirements && job.requirements.length > 0) ? job.requirements : [
                       "3+ years of experience in relevant field",
                       "Strong proficiency in modern technologies",
                       "Experience with cloud platforms (AWS/GCP/Azure)",
@@ -258,7 +325,7 @@ export const JobCard = ({ job, isApplied = false }: { job: Job; isApplied?: bool
 
                 <div>
                   <h3 className="font-bold text-lg mb-3">Benefits</h3>
-                   <ul className="grid grid-cols-2 gap-2">
+                  <ul className="grid grid-cols-2 gap-2">
                     {(job.benefits || [
                       "Competitive Salary", "Remote Work Options", "Health Insurance", "Stock Options", "Learning Budget", "Team Retreats"
                     ]).map((benefit, i) => (
@@ -268,7 +335,7 @@ export const JobCard = ({ job, isApplied = false }: { job: Job; isApplied?: bool
                     ))}
                   </ul>
                 </div>
-                
+
                 <div className="pt-4">
                   <h3 className="font-bold text-lg mb-3">Tech Stack</h3>
                   <div className="flex flex-wrap gap-2">
@@ -281,17 +348,17 @@ export const JobCard = ({ job, isApplied = false }: { job: Job; isApplied?: bool
                 </div>
               </div>
             </ScrollArea>
-           
-             <div className="absolute bottom-0 left-0 right-0 p-6 bg-background border-t border-border mt-auto">
-               <Button 
-                 size="lg" 
-                 className="w-full text-lg font-semibold shadow-lg hover:shadow-primary/25 transition-all"
-                 onClick={handleApply}
-                 disabled={isApplied}
-                 variant={isApplied ? "outline" : "default"}
-               >
-                 {isApplied ? "Applied" : "Apply Now"}
-               </Button>
+
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-background border-t border-border mt-auto">
+              <Button
+                size="lg"
+                className="w-full text-lg font-semibold shadow-lg hover:shadow-primary/25 transition-all"
+                onClick={handleApply}
+                disabled={isApplied}
+                variant={isApplied ? "outline" : "default"}
+              >
+                {isApplied ? "Applied" : "Apply Now"}
+              </Button>
             </div>
           </SheetContent>
         </Sheet>

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 
-// Simplified type definition for the onboarding data
+// Extended type definition for the onboarding data
 export interface OnboardingData {
   personalInfo: {
     fullName: string;
@@ -10,6 +10,8 @@ export interface OnboardingData {
     linkedin?: string;
     portfolio?: string;
     bio?: string;
+    age?: string;
+    languages?: string;
   };
   education: Array<{
     id: string;
@@ -25,21 +27,45 @@ export interface OnboardingData {
     duration: string;
     description: string;
   }>;
+  projects: Array<{
+    id: string;
+    title: string;
+    description: string;
+    technologies: string;
+    link?: string;
+  }>;
+  certifications: Array<{
+    id: string;
+    title: string;
+    issuer: string;
+    year?: string;
+  }>;
   skills: string[];
+}
+
+export interface ParsingResult {
+  data: Partial<OnboardingData>;
+  confidence: number;
+  sectionsFound: string[];
+  warnings: string[];
 }
 
 interface OnboardingContextType {
   data: OnboardingData;
   updateData: (newData: Partial<OnboardingData>) => void;
   updateStepData: <K extends keyof OnboardingData>(section: K, data: OnboardingData[K]) => void;
-  simulateResumeParsing: (file: File) => Promise<void>;
+  parseResume: (file: File) => Promise<ParsingResult>;
   isParsing: boolean;
+  parsingConfidence: number | null;
+  parsingWarnings: string[];
 }
 
 const initialData: OnboardingData = {
   personalInfo: { fullName: '', email: '', phone: '' },
   education: [],
   experience: [],
+  projects: [],
+  certifications: [],
   skills: []
 };
 
@@ -48,6 +74,8 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(undef
 export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
   const [data, setData] = useState<OnboardingData>(initialData);
   const [isParsing, setIsParsing] = useState(false);
+  const [parsingConfidence, setParsingConfidence] = useState<number | null>(null);
+  const [parsingWarnings, setParsingWarnings] = useState<string[]>([]);
 
   const updateData = (newData: Partial<OnboardingData>) => {
     setData(prev => ({ ...prev, ...newData }));
@@ -57,48 +85,49 @@ export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
     setData(prev => ({ ...prev, [section]: sectionData }));
   };
 
-  const simulateResumeParsing = async (file: File) => {
+  const parseResume = async (file: File): Promise<ParsingResult> => {
     setIsParsing(true);
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    
-    // Mock parsed data
-    const mockParsedData: Partial<OnboardingData> = {
-      personalInfo: {
-        fullName: "User from Resume",
-        email: "user@example.com",
-        phone: "+91 9876543210",
-        bio: "Passionate Full Stack Developer with 3 years of experience building scalable web applications. Proficient in React, Node.js, and TypeScript.",
-        github: "github.com/example",
-        linkedin: "linkedin.com/in/example"
-      },
-      skills: ["React", "TypeScript", "Node.js", "TailwindCSS", "PostgreSQL", "AWS"],
-      education: [
-        {
-          id: '1',
-          institution: "Indian Institute of Technology, Bombay",
-          degree: "B.Tech in Computer Science",
-          year: "2023",
-          score: "9.2 CGPA"
-        }
-      ],
-      experience: [
-        {
-          id: '1',
-          role: "Frontend Developer Intern",
-          company: "Tech Corp Inc.",
-          duration: "Jun 2022 - Aug 2022",
-          description: "Implemented new dashboard features using React and Redux. Improved page load performance by 40%."
-        }
-      ]
-    };
+    setParsingWarnings([]);
 
-    updateData(mockParsedData);
-    setIsParsing(false);
+    try {
+      const { parseResumeFile } = await import('@/lib/resume-parser');
+      const result = await parseResumeFile(file);
+
+      setParsingConfidence(result.confidence);
+      setParsingWarnings(result.warnings);
+
+      // Only apply data to form if confidence is acceptable
+      if (result.confidence >= 30) {
+        updateData(result.data);
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Failed to parse resume:', error);
+      const failResult: ParsingResult = {
+        data: {},
+        confidence: 0,
+        sectionsFound: [],
+        warnings: ['Failed to parse resume. Please fill manually.']
+      };
+      setParsingConfidence(0);
+      setParsingWarnings(failResult.warnings);
+      return failResult;
+    } finally {
+      setIsParsing(false);
+    }
   };
 
   return (
-    <OnboardingContext.Provider value={{ data, updateData, updateStepData, simulateResumeParsing, isParsing }}>
+    <OnboardingContext.Provider value={{
+      data,
+      updateData,
+      updateStepData,
+      parseResume,
+      isParsing,
+      parsingConfidence,
+      parsingWarnings
+    }}>
       {children}
     </OnboardingContext.Provider>
   );
