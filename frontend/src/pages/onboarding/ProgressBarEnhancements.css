@@ -1,0 +1,297 @@
+/* Enhanced Progress Bar Styling */
+
+/* Enhanced progress bar animations */
+@keyframes progressShine {
+  0% {
+    transform: translateX(-100%);
+  }
+  50%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes gradientFlow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(var(--primary-rgb), 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(var(--primary-rgb), 0.8);
+  }
+}
+
+@keyframes particleFloat {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--float-x), var(--float-y)) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes stepComplete {
+  0% {
+    transform: scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 1;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+@keyframes celebration {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(-5deg);
+  }
+  75% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}
+
+/* Progress container enhancements */
+.enhanced-progress-container {
+  position: relative;
+  padding: 2rem 1rem;
+}
+
+/* Active progress with animated gradient */
+.progress-bar-enhanced {
+  position: relative;
+  overflow: visible;
+}
+
+.progress-bar-enhanced::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: progressShine 2s infinite;
+}
+
+/* Enhanced step circle */
+.step-circle-enhanced {
+  position: relative;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Particles around active step */
+.step-particles {
+  position: absolute;
+  inset: -30px;
+  pointer-events: none;
+}
+
+.step-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  animation: particleFloat 2s ease-out infinite;
+}
+
+.step-particle:nth-child(1) {
+  --float-x: 20px;
+  --float-y: -30px;
+  top: 50%;
+  left: 50%;
+  animation-delay: 0s;
+}
+
+.step-particle:nth-child(2) {
+  --float-x: -25px;
+  --float-y: -25px;
+  top: 50%;
+  left: 50%;
+  animation-delay: 0.3s;
+}
+
+.step-particle:nth-child(3) {
+  --float-x: 30px;
+  --float-y: 20px;
+  top: 50%;
+  left: 50%;
+  animation-delay: 0.6s;
+}
+
+.step-particle:nth-child(4) {
+  --float-x: -20px;
+  --float-y: 25px;
+  top: 50%;
+  left: 50%;
+  animation-delay: 0.9s;
+}
+
+.step-particle:nth-child(5) {
+  --float-x: 0px;
+  --float-y: -35px;
+  top: 50%;
+  left: 50%;
+  animation-delay: 1.2s;
+}
+
+/* Ripple effect for completed steps */
+.step-ripple {
+  position: absolute;
+  inset: -5px;
+  border: 2px solid var(--primary);
+  border-radius: 50%;
+  animation: ripple 1.5s ease-out;
+}
+
+/* Milestone celebration */
+.milestone-celebration {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  animation: celebration 0.6s ease-out;
+  pointer-events: none;
+}
+
+/* Progress line with gradient */
+.progress-line-gradient {
+  background: linear-gradient(
+    90deg,
+    var(--primary),
+    var(--accent),
+    var(--primary)
+  );
+  background-size: 200% 100%;
+  animation: gradientFlow 3s ease infinite;
+}
+
+/* Glow effect */
+.glow-effect {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* Step completion animation */
+.step-complete-animation {
+  animation: stepComplete 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Enhanced hover states */
+.step-hover-effect:hover .step-circle-enhanced {
+  transform: scale(1.1);
+}
+
+/* Progress percentage indicator */
+.progress-percentage {
+  position: absolute;
+  top: -30px;
+  right: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--primary);
+  opacity: 0;
+  animation: fadeInSlide 0.5s ease-out 0.3s forwards;
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Sparkle effect */
+.sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: linear-gradient(45deg, transparent, white, transparent);
+  animation: sparkleAnimation 1.5s ease-in-out infinite;
+}
+
+@keyframes sparkleAnimation {
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
+}
+
+/* Confetti burst on completion */
+.confetti-burst {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confettiBurst 1s ease-out forwards;
+}
+
+@keyframes confettiBurst {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--confetti-x), var(--confetti-y)) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .step-particles {
+    inset: -20px;
+  }
+
+  .step-particle {
+    width: 3px;
+    height: 3px;
+  }
+}
