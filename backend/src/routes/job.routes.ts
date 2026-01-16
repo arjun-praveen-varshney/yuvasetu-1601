@@ -1,13 +1,10 @@
 import express from 'express';
 import { authenticateUser as protect } from '../middleware/auth.middleware'; // Reuse renamed import
-import { createJob, getEmployerJobs, getJobById, updateJob, deleteJob, getAllPublishedJobs } from '../controllers/job.controller';
+import { createJob, getEmployerJobs, getJobById, updateJob, deleteJob } from '../controllers/job.controller';
 import { applyToJob, updateApplicationStatus, getJobCandidates } from '../controllers/application.controller';
 import { getJobAnalytics } from '../controllers/analytics.controller';
 
 const router = express.Router();
-
-// Public Routes
-router.get('/', getAllPublishedJobs); // Get all published jobs
 
 // Employer Routes (Protected)
 router.post('/', protect, createJob);

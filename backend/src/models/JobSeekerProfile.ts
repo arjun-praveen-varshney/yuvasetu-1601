@@ -39,6 +39,10 @@ export interface IJobSeekerProfile extends Document {
         year?: number;
     }>;
     skills: string[];
+    skillsEmbedding?: number[];
+    experienceEmbedding?: number[];
+    bioEmbedding?: number[];
+    resumeEmbedding?: number[];
     preferences?: {
         notifications: {
             jobAlerts: boolean;
@@ -108,6 +112,18 @@ const JobSeekerProfileSchema: Schema = new Schema(
             },
         ],
         skills: [String],
+        // Multi-Vector Embeddings
+        skillsEmbedding: { type: [Number], select: false },
+        experienceEmbedding: { type: [Number], select: false },
+        bioEmbedding: { type: [Number], select: false },
+
+        // Deprecated single embedding
+        resumeEmbedding: {
+            type: [Number],
+            default: [],
+            select: false
+        },
+
         preferences: {
             notifications: {
                 jobAlerts: { type: Boolean, default: true },

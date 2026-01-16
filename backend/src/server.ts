@@ -75,8 +75,11 @@ import authRoutes from './routes/auth.routes';
 import protectedRoutes from './routes/protected.routes';
 import jobSeekerRoutes from './routes/jobSeeker.routes';
 import uploadRoutes from './routes/upload.routes';
+import ondemandRoutes from './routes/ondemand.routes';
 import employerRoutes from './routes/employer.routes';
 import jobRoutes from './routes/job.routes';
+import recommendationRoutes from './routes/recommendation.routes';
+import sttRoutes from './routes/stt.routes';
 
 import { createServer } from 'http';
 import { socketService } from './services/socket.service';
@@ -132,12 +135,18 @@ app.get('/api/pyqs', async (req, res) => {
 });// -------------------------------------------
 
 // Routes
+// Routes
 app.use('/auth', authRoutes);
+app.use('/api/stt', sttRoutes); // Public STT route
+import structureRoutes from './routes/structure.routes';
+app.use('/api/structure', structureRoutes); // Public Structure route
 app.use('/api', protectedRoutes);
 app.use('/api/job-seeker', jobSeekerRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/ondemand', ondemandRoutes);
 app.use('/api/employer', employerRoutes);
 app.use('/api/jobs', jobRoutes);
+app.use('/api/recommendations', recommendationRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');
